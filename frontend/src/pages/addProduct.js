@@ -9,7 +9,7 @@ const CreateProduct = () => {
     const [price, setPrice] = useState('');
     const [category, setCategory] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         let categoryEnum;
@@ -26,15 +26,27 @@ const CreateProduct = () => {
         }
 
         const product = { name, description, price, category: categoryEnum };
-        fetch('http://localhost:8080/api/v1/product/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(product)
-        })
-        navigate('/');
+
+        try {
+            const res = await fetch('http://localhost:8080/api/v1/product/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(product)
+            });
+
+            if (res.ok) {
+                navigate('/home');
+            } else {
+                const errorData = await res.json();
+                alert("Error adding product: " + errorData.message);
+            }
+        } catch (error) {
+            alert("Network error: " + error.message);
+        }
     };
+
 
     return (
         <div className="add-product">
@@ -77,6 +89,7 @@ const CreateProduct = () => {
                     ))}
                 </select>
                 <button type="submit">Add Product</button>
+                <button type="button" onClick={() => navigate(`/home`)}>Cancel</button>
             </form>
         </div>
     );
